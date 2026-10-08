@@ -1,0 +1,61 @@
+EXPERIMENT 2 - LEARNING RATE SCHEDULE
+========================================
+
+Purpose:
+    Test whether reducing the learning rate in later epochs smooths
+    the noisy validation curve observed in Experiment 1, and whether
+    it improves final accuracy.
+
+Setup:
+    Same as Experiment 1 (ResNet-18 pretrained, 20 epochs, Adam,
+    augmentation on), plus:
+        scheduler = StepLR(optimizer, step_size=7, gamma=0.3)
+    LR schedule: 1e-3 for epochs 1-7, 3e-4 for 8-14, 9e-5 for 15-20.
+
+Runtime:
+    ~2-3 minutes (GPU)
+
+Result:
+    Test loss     0.065
+    Test accuracy 0.978  (97.8%)    [ +3.2% over Experiment 1, +4.2% over baseline ]
+
+Per-epoch:
+    Epoch  1/20 | lr 1.00e-03 | train loss 0.483 acc 0.846 | val loss 0.329 acc 0.890
+    Epoch  2/20 | lr 1.00e-03 | train loss 0.313 acc 0.897 | val loss 0.207 acc 0.931
+    Epoch  3/20 | lr 1.00e-03 | train loss 0.270 acc 0.911 | val loss 0.305 acc 0.900
+    Epoch  4/20 | lr 1.00e-03 | train loss 0.236 acc 0.921 | val loss 0.248 acc 0.926
+    Epoch  5/20 | lr 1.00e-03 | train loss 0.227 acc 0.925 | val loss 0.195 acc 0.936
+    Epoch  6/20 | lr 1.00e-03 | train loss 0.200 acc 0.935 | val loss 0.185 acc 0.948
+    Epoch  7/20 | lr 3.00e-04 | train loss 0.191 acc 0.936 | val loss 0.230 acc 0.931
+    Epoch  8/20 | lr 3.00e-04 | train loss 0.126 acc 0.958 | val loss 0.094 acc 0.972
+    Epoch  9/20 | lr 3.00e-04 | train loss 0.099 acc 0.966 | val loss 0.087 acc 0.970
+    Epoch 10/20 | lr 3.00e-04 | train loss 0.092 acc 0.968 | val loss 0.100 acc 0.966
+    Epoch 11/20 | lr 3.00e-04 | train loss 0.095 acc 0.968 | val loss 0.086 acc 0.976
+    Epoch 12/20 | lr 3.00e-04 | train loss 0.089 acc 0.970 | val loss 0.107 acc 0.966
+    Epoch 13/20 | lr 3.00e-04 | train loss 0.091 acc 0.968 | val loss 0.105 acc 0.968
+    Epoch 14/20 | lr 9.00e-05 | train loss 0.091 acc 0.969 | val loss 0.104 acc 0.971
+    Epoch 15/20 | lr 9.00e-05 | train loss 0.064 acc 0.977 | val loss 0.078 acc 0.976
+    Epoch 16/20 | lr 9.00e-05 | train loss 0.058 acc 0.980 | val loss 0.078 acc 0.980
+    Epoch 17/20 | lr 9.00e-05 | train loss 0.058 acc 0.979 | val loss 0.089 acc 0.975
+    Epoch 18/20 | lr 9.00e-05 | train loss 0.054 acc 0.981 | val loss 0.073 acc 0.978
+    Epoch 19/20 | lr 9.00e-05 | train loss 0.052 acc 0.980 | val loss 0.072 acc 0.978
+    Epoch 20/20 | lr 9.00e-05 | train loss 0.050 acc 0.982 | val loss 0.073 acc 0.979
+
+Observations:
+    - MAJOR improvement: +3.2% test accuracy from a single-line change.
+    - The noisy val curve from Experiment 1 is nearly gone. Second-half
+      val accuracy is tight (0.966-0.979) compared to Exp 1's swings.
+    - The moment the LR drops from 1e-3 to 3e-4 (epoch 8), val loss
+      collapses from 0.23 to 0.094 in a single epoch. The model was
+      previously bouncing out of good minima every step.
+    - No overfitting: final train acc 0.982 vs val acc 0.979, gap ~0.3%.
+
+Conclusion:
+    Learning rate is arguably the most important hyperparameter. A
+    schedule that lets the model "settle in" in later epochs unlocked
+    a full accuracy regime the fixed-LR runs never reached.
+
+    This is the strongest result so far and will be the reference
+    baseline for Experiments 3-5.
+
+Saved model: resnet18_20ep_lrsched.pt

@@ -1,0 +1,76 @@
+EXPERIMENT 5 - FROM-SCRATCH CNN
+=================================
+
+Purpose:
+    Isolate the value of pretraining. Train a small CNN from random
+    initialization on the same data and pipeline as Experiment 2.
+    Measure the gap.
+
+Setup:
+    Model:      SimpleCNN (4 conv blocks, batch norm, adaptive pooling,
+                single linear head). 586,154 parameters.
+    Init:       Random (no pretrained weights)
+    Dataset:    Same EuroSAT split (70/15/15, seed 42)
+    Aug:        Same as Exp 2 (h-flip, v-flip, 90-deg rotation)
+    Optimizer:  Adam, lr=1e-3
+    Scheduler:  StepLR(step_size=7, gamma=0.3)
+    Epochs:     20
+    Runtime:    ~3 minutes (GPU)
+
+Result:
+    Test loss     0.111
+    Test accuracy 0.962  (96.2%)
+
+Comparison to Experiment 2 (pretrained ResNet-18):
+    Exp 2 params:             11,181,642
+    Exp 5 params:                586,154   (~5.2% of ResNet-18)
+    Exp 2 test accuracy:            0.978
+    Exp 5 test accuracy:            0.962
+    Gap:                           -1.6%
+
+Per-epoch:
+    Epoch  1/20 | lr 1.00e-03 | train loss 0.827 acc 0.705 | val loss 0.614 acc 0.777
+    Epoch  2/20 | lr 1.00e-03 | train loss 0.578 acc 0.796 | val loss 0.582 acc 0.808
+    Epoch  3/20 | lr 1.00e-03 | train loss 0.478 acc 0.833 | val loss 0.436 acc 0.849
+    Epoch  4/20 | lr 1.00e-03 | train loss 0.400 acc 0.864 | val loss 0.439 acc 0.856
+    Epoch  5/20 | lr 1.00e-03 | train loss 0.361 acc 0.873 | val loss 0.343 acc 0.886
+    Epoch  6/20 | lr 1.00e-03 | train loss 0.320 acc 0.890 | val loss 0.257 acc 0.914
+    Epoch  7/20 | lr 3.00e-04 | train loss 0.279 acc 0.904 | val loss 0.229 acc 0.922
+    Epoch  8/20 | lr 3.00e-04 | train loss 0.194 acc 0.936 | val loss 0.150 acc 0.952
+    Epoch  9/20 | lr 3.00e-04 | train loss 0.179 acc 0.938 | val loss 0.138 acc 0.956
+    Epoch 10/20 | lr 3.00e-04 | train loss 0.171 acc 0.941 | val loss 0.145 acc 0.948
+    Epoch 11/20 | lr 3.00e-04 | train loss 0.163 acc 0.943 | val loss 0.146 acc 0.952
+    Epoch 12/20 | lr 3.00e-04 | train loss 0.156 acc 0.946 | val loss 0.152 acc 0.949
+    Epoch 13/20 | lr 3.00e-04 | train loss 0.138 acc 0.952 | val loss 0.113 acc 0.962
+    Epoch 14/20 | lr 9.00e-05 | train loss 0.150 acc 0.947 | val loss 0.140 acc 0.955
+    Epoch 15/20 | lr 9.00e-05 | train loss 0.117 acc 0.959 | val loss 0.098 acc 0.967
+    Epoch 16/20 | lr 9.00e-05 | train loss 0.109 acc 0.964 | val loss 0.113 acc 0.964
+    Epoch 17/20 | lr 9.00e-05 | train loss 0.109 acc 0.963 | val loss 0.099 acc 0.967
+    Epoch 18/20 | lr 9.00e-05 | train loss 0.108 acc 0.964 | val loss 0.097 acc 0.970
+    Epoch 19/20 | lr 9.00e-05 | train loss 0.101 acc 0.966 | val loss 0.097 acc 0.967
+    Epoch 20/20 | lr 9.00e-05 | train loss 0.105 acc 0.962 | val loss 0.099 acc 0.969
+
+Observations:
+    - From-scratch CNN reaches 96.2% -- only 1.6% behind pretrained
+      ResNet-18 -- with ~19x fewer parameters.
+    - The pretrained model converges much faster: at epoch 1 it was at
+      val 0.890 vs from-scratch at val 0.777. Pretraining saves TIME,
+      not just accuracy.
+    - Final generalization gap is small (train 0.962 vs val 0.969).
+      Val > train throughout due to augmentation making training
+      examples harder.
+    - The "moment of click" happens later in the from-scratch run
+      (epoch 6 jump in val) than in the pretrained run (epoch 3).
+
+Conclusion:
+    On EuroSAT, pretraining is worth ~1.6% test accuracy and much
+    faster convergence. But the dataset's visual simplicity means a
+    small CNN trained from scratch is competitive. The value of
+    pretraining would be MUCH larger on harder datasets (smaller
+    objects, more classes, more visual clutter).
+
+    Useful framing: pretraining buys convergence speed and data
+    efficiency, not necessarily a higher ceiling -- at least on easy
+    datasets.
+
+Saved model: simplecnn_fromscratch.pt

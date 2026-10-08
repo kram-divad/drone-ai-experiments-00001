@@ -1,0 +1,41 @@
+EXPERIMENT 1 - TRAIN LONGER, 20 EPOCHS
+======================================
+
+Purpose:
+    Test whether doubling training length (10 -> 20 epochs) improves
+    accuracy, and observe where (or whether) overfitting begins.
+
+Setup:
+    Identical to Experiment 0, except EPOCHS = 20.
+
+Runtime:
+    ~2h 13m (CPU)
+
+Result:
+    Test loss     0.179
+    Test accuracy 0.946 (94.6%)    [ +1.0% over Experiment 0 ]
+
+Observations:
+    - NO OVERFITTING, even at 20 epochs.
+        * Train accuracy climbs smoothly to ~95%.
+        * Val accuracy swings up to 5 percentage points epoch-to-epoch,
+          but its trend is flat-to-slightly-up. No sustained divergence.
+        * Train loss is smooth; val loss spikes at epochs 5, 10, 13
+          and recovers each time.
+
+    - Diagnosis: the noisy val curve is a VARIANCE problem, not a
+      generalization problem.
+
+    - Likely causes of val noise:
+        (a) Small val set (4,050 images) -> noisy averages.
+        (b) BatchNorm running statistics still settling.
+        (c) Aggressive augmentation creates mild train/val mismatch.
+
+Conclusion:
+    Longer training gave a modest gain (+1.0%) and confirmed the model
+    is not yet overfitting. The main actionable insight is that the
+    learning rate is likely too high in late epochs, causing the model
+    to bounce around rather than settle. This motivates Experiment 2:
+    add a learning rate scheduler.
+
+Saved model: resnet18_20ep.pt

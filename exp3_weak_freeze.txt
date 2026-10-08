@@ -1,0 +1,32 @@
+EXPERIMENT 3 - WEAK FREEZE (conv1..layer2)
+============================================
+
+Purpose:
+    Test whether the earliest pretrained layers already encode what
+    EuroSAT needs, by freezing them and training only layer3, layer4
+    and fc.
+
+Setup:
+    Same as Experiment 2 (ResNet-18 pretrained, 20 epochs, Adam
+    lr=1e-3, StepLR step_size=7 gamma=0.3, augmentation on), plus:
+    Frozen:     conv1, bn1, layer1, layer2   (~6% of params)
+    Trained:    layer3, layer4, fc           (~94% of params)
+    Note:       frozen BatchNorm layers were NOT put in eval() mode,
+                so their running statistics kept updating during
+                training (this was fixed in Experiment 3b).
+
+Result:
+    Test accuracy 0.967  (96.7%)    [ -1.1% vs Experiment 2 ]
+    (Test loss and per-epoch values are not recorded in this log.)
+
+Observations:
+    - Freezing even a small fraction of the parameters cost accuracy.
+    - The early layers were not strictly necessary, but they still
+      contributed.
+
+Conclusion:
+    Freezing is a trade-off, not a free win. ImageNet's earliest layers
+    learn natural-photo statistics, and EuroSAT's satellite imagery
+    benefits slightly from letting them adapt.
+
+Saved model: resnet18_frozen_early.pt

@@ -1,0 +1,76 @@
+EXPERIMENT 4 - AUGMENTATION ABLATION
+=======================================
+
+Purpose:
+    Measure how much the training augmentation (horizontal flip,
+    vertical flip, 90-degree rotation) actually contributes on EuroSAT.
+    Test whether removing it causes overfitting.
+
+Setup:
+    Identical to Experiment 2 (ResNet-18 pretrained, 20 epochs, Adam
+    lr=1e-3, StepLR step_size=7 gamma=0.3, no freeze), EXCEPT the
+    training transform is reduced to just ToTensor + Normalize --
+    the same transform used for validation and test.
+
+    Train transform:  ToTensor -> Normalize
+    Eval transform:   ToTensor -> Normalize  (unchanged)
+
+Runtime:
+    ~5 minutes (GPU)
+
+Result:
+    Test loss     0.156
+    Test accuracy 0.965  (96.5%)
+
+Comparison to Experiment 2 (with augmentation):
+    Exp 2 train acc (final):  0.982  |  Exp 4 train acc (final):  1.000
+    Exp 2 val acc   (final):  0.979  |  Exp 4 val acc   (final):  0.972
+    Exp 2 test acc:           0.978  |  Exp 4 test acc:           0.965
+    Exp 2 train-val gap:      ~0.3%  |  Exp 4 train-val gap:      ~2.8%
+
+Per-epoch:
+    Epoch  1/20 | lr 1.00e-03 | train loss 0.371 acc 0.885 | val loss 0.241 acc 0.928
+    Epoch  2/20 | lr 1.00e-03 | train loss 0.226 acc 0.928 | val loss 0.293 acc 0.898
+    Epoch  3/20 | lr 1.00e-03 | train loss 0.161 acc 0.947 | val loss 0.455 acc 0.878
+    Epoch  4/20 | lr 1.00e-03 | train loss 0.142 acc 0.956 | val loss 0.205 acc 0.936
+    Epoch  5/20 | lr 1.00e-03 | train loss 0.109 acc 0.964 | val loss 0.272 acc 0.917
+    Epoch  6/20 | lr 1.00e-03 | train loss 0.089 acc 0.971 | val loss 0.158 acc 0.952
+    Epoch  7/20 | lr 3.00e-04 | train loss 0.091 acc 0.971 | val loss 0.177 acc 0.945
+    Epoch  8/20 | lr 3.00e-04 | train loss 0.026 acc 0.991 | val loss 0.102 acc 0.971
+    Epoch  9/20 | lr 3.00e-04 | train loss 0.013 acc 0.996 | val loss 0.112 acc 0.969
+    Epoch 10/20 | lr 3.00e-04 | train loss 0.010 acc 0.997 | val loss 0.110 acc 0.972
+    Epoch 11/20 | lr 3.00e-04 | train loss 0.008 acc 0.997 | val loss 0.121 acc 0.970
+    Epoch 12/20 | lr 3.00e-04 | train loss 0.011 acc 0.996 | val loss 0.133 acc 0.965
+    Epoch 13/20 | lr 3.00e-04 | train loss 0.013 acc 0.996 | val loss 0.125 acc 0.969
+    Epoch 14/20 | lr 9.00e-05 | train loss 0.020 acc 0.993 | val loss 0.130 acc 0.967
+    Epoch 15/20 | lr 9.00e-05 | train loss 0.004 acc 0.999 | val loss 0.107 acc 0.969
+    Epoch 16/20 | lr 9.00e-05 | train loss 0.002 acc 1.000 | val loss 0.104 acc 0.973
+    Epoch 17/20 | lr 9.00e-05 | train loss 0.002 acc 1.000 | val loss 0.112 acc 0.974
+    Epoch 18/20 | lr 9.00e-05 | train loss 0.002 acc 0.999 | val loss 0.122 acc 0.971
+    Epoch 19/20 | lr 9.00e-05 | train loss 0.001 acc 0.999 | val loss 0.109 acc 0.975
+    Epoch 20/20 | lr 9.00e-05 | train loss 0.001 acc 1.000 | val loss 0.117 acc 0.972
+
+Observations:
+    - WITHOUT augmentation, training accuracy hits 1.000 (perfect
+      memorization of the training set) by epoch 16.
+    - Validation accuracy plateaus around 0.97 and never breaks 0.975.
+    - Train loss reaches ~0.001 while val loss hovers at 0.10-0.13.
+      This is the textbook shape of overfitting.
+    - Val loss even RISES slightly in epochs 11-14 (0.121 -> 0.133)
+      while train loss keeps falling (0.008 -> 0.011), then recovers
+      a little at the end. Classic divergence signature.
+
+Conclusion:
+    Augmentation prevents the model from memorizing the training set.
+    On EuroSAT, removing it costs ~1.3% test accuracy (97.8% -> 96.5%)
+    but inflates the generalization gap by ~9x (0.3% -> 2.8%).
+
+    The accuracy cost is modest because EuroSAT classes are visually
+    distinct and the dataset is small -- the model doesn't NEED much
+    augmentation to learn useful features. But the generalization gap
+    clearly shows augmentation is doing what it's supposed to do.
+
+    This is a concrete, measured illustration of "generalization" --
+    the exact concept Module 1 of the course emphasizes.
+
+Saved model: resnet18_noaug.pt

@@ -1,0 +1,45 @@
+EXPERIMENT 3b - STRONG FREEZE (conv1..layer3)
+==============================================
+
+Purpose:
+    Test whether freezing ~25% of ResNet-18's parameters (conv1, bn1,
+    layer1, layer2, layer3) still reaches ~95-97% test accuracy. Also
+    fix a subtle issue from Experiment 3: frozen BatchNorm layers were
+    still updating their running stats during training.
+
+Setup:
+    Model:      ResNet-18 (pretrained ImageNet), fc replaced with 10-class head
+    Frozen:     conv1, bn1, layer1, layer2, layer3   (25% of params, ~2.78M)
+    Trained:    layer4, fc                           (75% of params, ~8.40M)
+    Fix:        frozen BatchNorm layers kept in eval() mode during training
+    Optimizer:  Adam, lr=1e-3 (only trainable params)
+    Scheduler:  StepLR(step_size=7, gamma=0.3)
+    Epochs:     20
+    Runtime:    ~5 minutes (GPU)
+
+Result:
+    Test loss     0.121  (approx)
+    Test accuracy 0.957  (95.7%)
+
+Comparison:
+    Experiment 2  (no freeze, 100% trained) : 97.8%
+    Experiment 3  (weak freeze, 94% trained): 96.7%
+    Experiment 3b (strong freeze, 75% trained): 95.7%
+
+Observations:
+    - Clean monotonic trend: more freezing -> slightly lower accuracy.
+      Roughly 1% loss per 20% of the network frozen on this dataset.
+    - No overfitting: train and val curves overlap throughout.
+    - Both curves still improving slowly at epoch 20; more epochs could
+      gain a bit more.
+    - Val is smoother than Experiment 2 early on (likely due to the BN
+      fix in the frozen layers, plus the smaller trainable set).
+
+Conclusion:
+    Transfer learning is a real trade-off on EuroSAT. The pretrained
+    early layers are useful but not perfect for satellite imagery;
+    fine-tuning them yields a small but measurable gain. Freezing is
+    still worth it when compute/memory matters - the ~2% accuracy cost
+    is small compared to the practical benefits.
+
+Saved model: resnet18_frozen_layer3.pt
