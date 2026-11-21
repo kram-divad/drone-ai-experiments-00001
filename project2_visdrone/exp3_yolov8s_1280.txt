@@ -1,0 +1,56 @@
+EXPERIMENT 3 - YOLOV8S AT IMGSZ=1280
+========================================
+
+Purpose:
+    Test whether a larger model (yolov8s, ~11M params) adds
+    performance on top of the resolution gain already established in
+    Experiment 2.
+
+Setup:
+    Model:        YOLOv8s (11,139,470 params, 28.7 GFLOPs)
+    Pretraining:  COCO
+    Dataset:      VisDrone2019-DET (train 6471 / val 548)
+    Epochs:       30
+    Batch size:   8
+    Input size:   1280
+    Hardware:     Tesla T4
+    Runtime:      3.263 hours (~6.3 min/epoch)
+    Peak VRAM:    ~14.3 GB (no OOM)
+
+Overall metrics (best.pt):
+    mAP50-95     0.331     (Exp 2: 0.278, +19%)
+    mAP50        0.543     (Exp 2: 0.468, +16%)
+    Precision    0.625
+    Recall       0.512
+
+Per-class mAP50-95 / mAP50 (best.pt):
+    car                0.633  /  0.879
+    bus                0.494  /  0.666
+    motor              0.312  /  0.635
+    pedestrian         0.319  /  0.643
+    van                0.411  /  0.567
+    truck              0.346  /  0.502
+    tricycle           0.269  /  0.454
+    people             0.215  /  0.512
+    awning-tricycle    0.143  /  0.239
+    bicycle            0.167  /  0.331
+
+Per-class gains vs Exp 2 (mAP50):
+    bicycle            +50%
+    tricycle           +30%
+    awning-tricycle    +24%
+    truck              +22%
+    people             +19%
+    pedestrian         +16%
+    motor              +16%
+    van                +12%
+    bus                +8%
+    car                +4%
+
+Conclusion:
+    Model capacity contributes on top of resolution, but smaller than
+    resolution. Exp 1->2 (resolution): +68% mAP50. Exp 2->3 (capacity):
+    +16% for ~3.7x parameters. Both compound: 0.279 -> 0.543.
+    Capacity gains concentrated in small/thin classes.
+
+Saved model: exp3_yolov8s_1280/weights/best.pt

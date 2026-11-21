@@ -1,0 +1,47 @@
+EXPERIMENT 2 - YOLOV8N AT IMGSZ=1280
+========================================
+
+Purpose:
+    Test whether doubling input resolution from 640 to 1280 improves
+    detection of small objects on VisDrone.
+
+Setup:
+    Model:        YOLOv8n (same as Exp 1, pretrained COCO)
+    Dataset:      VisDrone2019-DET (train 6471 / val 548)
+    Epochs:       30
+    Batch size:   8 (reduced to fit 1280px)
+    Input size:   1280  (ONLY CHANGE vs Exp 1)
+    Hardware:     Tesla T4
+    Runtime:      2.954 hours (~5.5 min/epoch)
+
+Overall metrics (best.pt):
+    mAP50-95     0.278     (Exp 1: 0.157, +77%)
+    mAP50        0.468     (Exp 1: 0.279, +68%)
+    Precision    0.562
+    Recall       0.451
+
+Per-class mAP50-95 / mAP50 (best.pt):
+    Class             Exp2 mAP50     Exp1 mAP50    Fold
+    car                0.845           0.712        1.2x
+    bus                0.619           0.364        1.7x
+    motor              0.549           0.306        1.8x
+    pedestrian         0.553           0.289        1.9x
+    people             0.431           0.214        2.0x
+    van                0.506           0.314        1.6x
+    truck              0.411           0.261        1.6x
+    tricycle           0.349           0.193        1.8x
+    awning-tricycle    0.193           0.082        2.4x
+    bicycle            0.221           0.054        4.1x
+
+Observations:
+    - LARGEST gains in small/thin classes: bicycle 4.1x, awning-
+      tricycle 2.4x, people 2.0x, pedestrian 1.9x.
+    - Smallest gain in car (1.2x) — already near saturation.
+    - Training was still improving at epoch 30.
+
+Conclusion:
+    Input resolution was the single biggest lever for VisDrone
+    detection. Doubling resolution nearly doubled mAP50 and produced
+    2-4x improvement on small classes.
+
+Saved model: exp2_imgsz1280/weights/best.pt

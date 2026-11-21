@@ -1,0 +1,43 @@
+EXPERIMENT 1 - BASELINE YOLOV8N ON VISDRONE
+==============================================
+
+Purpose:
+    Establish a baseline object detector on VisDrone DET using YOLOv8n
+    (smallest YOLO variant), fully fine-tuned from COCO-pretrained
+    weights.
+
+Setup:
+    Model:        YOLOv8n (3,012,798 params, 8.2 GFLOPs)
+    Pretraining:  COCO
+    Dataset:      VisDrone2019-DET (train 6471 / val 548 / test-dev 1610)
+    Epochs:       30 (completed all 30)
+    Batch size:   16
+    Input size:   640
+    Hardware:     Tesla T4 (14913 MiB)
+    Runtime:      4022 seconds (~67 minutes)
+
+Overall metrics (best.pt, val set of 548 images):
+    mAP50-95     0.157
+    mAP50        0.279
+    Precision    0.405
+    Recall       0.307
+
+Per-class mAP50-95 / mAP50 (best.pt):
+    car                0.463  /  0.712
+    bus                0.247  /  0.364
+    van                0.212  /  0.314
+    truck              0.171  /  0.261
+    motor              0.117  /  0.306
+    pedestrian         0.116  /  0.289
+    tricycle           0.101  /  0.193
+    awning-tricycle    0.050  /  0.082
+    people             0.071  /  0.214
+    bicycle            0.019  /  0.054
+
+Conclusion:
+    Baseline established at mAP50 = 0.279. Performance dominated by
+    large-vehicle detection (car mAP50 = 0.71); small/thin classes
+    (bicycle, awning-tricycle, people) near noise floor. Hypothesis:
+    input resolution is the bottleneck.
+
+Saved model: exp1_finetune/weights/best.pt

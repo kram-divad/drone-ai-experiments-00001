@@ -1,0 +1,18 @@
+
+# Large files (weights, datasets)
+*.pt
+*.pth
+*.zip
+*.tar.gz
+# Datasets
+data/
+datasets/
+# Colab
+.ipynb_checkpoints/
+# Python
+__pycache__/
+*.pyc
+.env
+# Credentials — NEVER commit
+kaggle.json
+.kaggle/

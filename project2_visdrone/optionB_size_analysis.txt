@@ -1,0 +1,61 @@
+OPTION B - SIZE-STRATIFIED ANALYSIS OF EXP 1 vs EXP 2
+=========================================================
+
+Purpose:
+    Test whether the improvement from 640px (Exp 1) to 1280px (Exp 2)
+    is concentrated in small objects.
+
+Method:
+    1. Compute median ground-truth box size per class on val set.
+    2. Group 10 VisDrone classes into COCO size buckets:
+         small  = median area < 32^2 px^2  (1024)
+         medium = median area < 96^2 px^2  (9216)
+         large  = median area >= 96^2 px^2
+    3. Evaluate Exp 1 (640) and Exp 2 (1280) on val.
+    4. Average mAP50-95 per bucket.
+    5. Compare per bucket.
+
+Median ground-truth box size per class:
+    class              n     median px^2   median px side
+    pedestrian      8844        295.0          17.2
+    people          5125        280.0          16.7
+    bicycle         1287        432.0          20.8
+    car            14064       1056.0          32.5
+    van             1975       1128.0          33.6
+    truck            750       1491.0          38.6
+    tricycle        1045        805.0          28.4
+    awning-tricycle  532        858.0          29.3
+    bus              251       1242.0          35.2
+    motor           4886        400.0          20.0
+
+Bucket assignments:
+    small  (6 classes): pedestrian, people, bicycle, tricycle,
+                        awning-tricycle, motor
+    medium (4 classes): car, van, truck, bus
+    large  (0 classes): (none - VisDrone has no COCO-large objects)
+
+Bucket-level results:
+    bucket    n   Exp1 mAP50-95   Exp2 mAP50-95   gain    fold
+    small     6      0.079           0.181        +0.102  2.29x
+    medium    4      0.273           0.414        +0.141  1.51x
+    large     0      --              --           --      --
+
+Per-class fold gains (mAP50-95):
+    bicycle         5.26x
+    people          2.35x
+    pedestrian      2.27x
+    awning-tricycle 2.25x
+    motor           2.14x
+    tricycle        1.88x
+    bus             1.75x
+    van             1.67x
+    truck           1.62x
+    car             1.28x
+
+Conclusion:
+    Small bucket improved 2.29x; medium bucket 1.51x. The larger
+    improvement for smaller objects directly confirms the resolution
+    hypothesis. VisDrone has NO "large" objects by COCO standards,
+    explaining why resolution is such a powerful lever.
+
+Saved figure: exp3_size_buckets.png
