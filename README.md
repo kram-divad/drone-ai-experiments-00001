@@ -84,3 +84,35 @@ Land Cover Classification.* IEEE Journal of Selected Topics in Applied Earth Obs
 ## Author
 
 Mark David Mapalo Mwila
+
+
+---
+
+## Project 2: VisDrone Object Detection
+
+YOLOv8 detection on the VisDrone2019-DET aerial imagery dataset. An ablation study testing which lever drives small-object detection performance: **input resolution** or **model capacity**.
+
+### Results
+
+| Exp | Model | imgsz | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| 1 | yolov8n (3.0M params) | 640 | 0.279 | 0.157 |
+| 2 | yolov8n (3.0M params) | 1280 | 0.468 | 0.278 |
+| 3 | yolov8s (11.1M params) | 1280 | **0.543** | **0.331** |
+
+**Finding:** Resolution is the dominant lever (+68% mAP50 from 640→1280); capacity adds +16% on top. Both compound. A size-stratified analysis shows gains are concentrated in small objects.
+
+### Dataset
+
+[VisDrone2019-DET](https://github.com/VisDrone/VisDrone-Dataset) — 6,471 train / 548 val images, 10 classes, up to 902 objects per image.
+
+### Files
+
+See [project2_visdrone/](project2_visdrone/) for the notebook, per-experiment logs, and comparison figures.
+
+### Key lessons
+
+1. **Resolution is the dominant lever** for small-object detection on VisDrone.
+2. **Capacity helps, but secondary** (+16% for 3.7× parameters).
+3. **VisDrone has no COCO-large objects** — explaining why resolution pays off so much.
+4. **30 epochs is undertrained** — all experiments still improving at epoch 30.
