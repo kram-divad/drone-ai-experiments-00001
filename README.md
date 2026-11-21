@@ -116,3 +116,24 @@ See [project2_visdrone/](project2_visdrone/) for the notebook, per-experiment lo
 2. **Capacity helps, but secondary** (+16% for 3.7× parameters).
 3. **VisDrone has no COCO-large objects** — explaining why resolution pays off so much.
 4. **30 epochs is undertrained** — all experiments still improving at epoch 30.
+
+
+---
+
+## Project 3: Semantic Segmentation on the Semantic Drone Dataset
+
+U-Net semantic segmentation on drone imagery. Three experiments testing whether **loss function** or **pretrained encoder** improve performance on a 23-class dataset with severe class imbalance.
+
+### Results
+
+| Exp | Loss | Encoder | Val mIoU | Time |
+|---|---|---|---|---|
+| 3a | CrossEntropy | From scratch | 0.039 | 49 min |
+| 3b | Dice+CE | From scratch | 0.035 | 49 min |
+| 3d | Dice+CE | Pretrained ResNet-34 | 0.033 | 44 min |
+
+**Finding:** All three experiments converge to a degenerate solution (~0.03 mIoU). The model learns dominant classes (paved-area IoU 0.38, grass 0.21) but fails on 20 rare classes. Diagnosis: **random 512×512 crops sample rare classes with <1% probability**, so the model never sees them enough to learn. The bottleneck is data distribution, not model capacity or loss function.
+
+### Files
+
+See [project3_segmentation/](project3_segmentation/) for the notebook, write-up, and training-curve figures.
